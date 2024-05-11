@@ -11,6 +11,9 @@
                 </b-col>
             </b-row>
         </div>
+        <div class="botones">
+            <b-button variant="success" @click="guardar">Guardar</b-button>
+        </div>
     </b-container>
 </template>
 <script>
@@ -51,6 +54,10 @@ export default {
         },
         cargarElementos: function(data) {
             this.asientos = data
+        },
+        guardar: function() {
+            this.actualizarElementos();
+            console.log("transaccion ejecutada");
         }
     }
 }
@@ -77,5 +84,9 @@ export default {
 
 .ocupado {
     background-color: #73264f;
+}
+
+.botones {
+    margin-top: 60px;
 }
 </style>
