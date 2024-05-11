@@ -6,7 +6,7 @@
         <div class="asientos">
             <b-row>
                 <b-col class="asiento disponible" v-for="asiento in asientos" :key="asiento.id" v-text="asiento.id"
-                    :class="{ disponible: asiento.disponible, ocupado: !asiento.disponible }"
+                    :class="{ disponible: asiento.disponible, ocupado: !asiento.disponible, pointer: asientoDisponible(asiento) }"
                     @click="seleccionarAsiento" :id="asiento.id">
                 </b-col>
             </b-row>
@@ -45,6 +45,10 @@ export default {
     methods: {
         seleccionarAsiento: function (event) {
             let asiento = this.asientos.find(a => a.id == event.target.id)
+            if (asiento.adquirido) {
+                console.log("No es posible seleccionar el asiento " + asiento.id);
+                return
+            }
             asiento.disponible = !asiento.disponible
             console.log(asiento);
         },
@@ -58,6 +62,9 @@ export default {
         guardar: function() {
             this.actualizarElementos();
             console.log("transaccion ejecutada");
+        },
+        asientoDisponible: function (asiento) {
+            return !asiento.adquirido
         }
     }
 }
@@ -88,5 +95,9 @@ export default {
 
 .botones {
     margin-top: 60px;
+}
+
+.pointer {
+    cursor: pointer;
 }
 </style>
