@@ -14,24 +14,43 @@
     </b-container>
 </template>
 <script>
+import { child, get, getDatabase, ref, set } from "firebase/database";
+
+const path = 'salas';
+const pathId = 1;
+
 export default {
+    created () {
+        const dbRef = ref(getDatabase());
+        get(child(dbRef, `${path}/${pathId}`))
+        .then((snapshot) => {
+            if(snapshot.exists()) {
+                console.log(snapshot.val());
+                this.cargarElementos(snapshot.val())
+            } else {
+                console.log("No data available");
+            }
+        }).catch((error) => {
+            console.error(error);
+        })
+    },
     data() {
         return {
-            asientos: [
-                { id: 'A1', disponible: false },
-                { id: 'A2', disponible: true },
-                { id: 'A3', disponible: true },
-                { id: 'A4', disponible: false },
-                { id: 'A5', disponible: true },
-                { id: 'A6', disponible: true },
-            ]
+            asientos: []
         }
     },
     methods: {
         seleccionarAsiento: function (event) {
-            let asiento = this.asientos.find( a => a.id == event.target.id)
+            let asiento = this.asientos.find(a => a.id == event.target.id)
             asiento.disponible = !asiento.disponible
             console.log(asiento);
+        },
+        actualizarElementos: function () {
+            const db = getDatabase();
+            set(ref(db, `${path}/${pathId}`), this.asientos)
+        },
+        cargarElementos: function(data) {
+            this.asientos = data
         }
     }
 }
