@@ -18,35 +18,39 @@
     </b-container>
 </template>
 <script>
-import { getDatabase, onValue, ref, set } from "firebase/database";
+import { child, getDatabase, onValue, push, ref, set } from "firebase/database";
 
 const path = 'salas';
 const pathId = 1;
 
 export default {
     created() {
-        onValue(ref(getDatabase(), `${path}/${pathId}`),(snapshot) => {
-                if (snapshot.exists()) {
-                    console.log(snapshot.val());
-                    this.cargarElementos(snapshot.val())
-                } else {
-                    console.log("No data available");
-                }
-            })
+        const dbRef = ref(getDatabase())
+        this.id = push(child(dbRef, `${path}/${pathId}`)).key;
+        onValue(ref(getDatabase(), `${path}/${pathId}`), (snapshot) => {
+            if (snapshot.exists()) {
+                console.log(snapshot.val());
+                this.cargarElementos(snapshot.val())
+            } else {
+                console.log("No data available");
+            }
+        })
     },
     data() {
         return {
+            id: '',
             asientos: []
         }
     },
     methods: {
         seleccionarAsiento: function (event) {
             let asiento = this.asientos.find(a => a.id == event.target.id)
-            if (asiento.adquirido) {
+            if (asiento.adquirido || (asiento.user_id != null && asiento.user_id != this.id)) {
                 console.log("No es posible seleccionar el asiento " + asiento.id);
                 return
             }
             asiento.disponible = !asiento.disponible
+            asiento.user_id = this.id
             this.actualizarElementos()
             console.log(asiento);
         },
@@ -68,7 +72,7 @@ export default {
             });
         },
         asientoDisponible: function (asiento) {
-            return !asiento.adquirido
+            return !asiento.adquirido && (asiento.user_id == null || asiento.user_id == this.id)
         },
         asientosSeleccionados: function () {
             return this.asientos.filter(a => !a.disponible && !a.adquirido)
@@ -77,6 +81,7 @@ export default {
             this.asientos.forEach(function(asiento) {
                 asiento.disponible = true
                 asiento.adquirido = false
+                asiento.user_id = null
             })
             this.actualizarElementos()
         }
