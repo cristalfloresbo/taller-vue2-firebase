@@ -23,7 +23,7 @@
     </b-container>
 </template>
 <script>
-import { child, getDatabase, onValue, push, ref, set } from "firebase/database";
+import { child, getDatabase, onValue, push, ref, runTransaction, set } from "firebase/database";
 
 const path = 'salas';
 const pathId = 1;
@@ -53,9 +53,13 @@ export default {
             let asiento = this.asientos.find(a => a.id == event.target.id)
             if (asiento.adquirido || (asiento.user_id != null && asiento.user_id != this.id)) {
                 console.log("No es posible seleccionar el asiento " + asiento.id);
+                this.$notify({
+                    group: 'foo', type: 'error', title: 'Error', text: 'No es posible seleccionar el asiento ' + asiento.id
+                })
                 return
             }
             asiento.disponible = !asiento.disponible
+            console.log(this.id);
             asiento.user_id = this.id
             this.actualizarElementos()
             this.contador = this.asientosSeleccionados().length
@@ -65,14 +69,40 @@ export default {
             const db = getDatabase();
             set(ref(db, `${path}/${pathId}`), this.asientos)
         },
+        validarRespuesta: function (response) {
+            response.then(({ committed, snapshot }) => {
+                if (committed) {
+                    this.$notify({
+                        group: 'foo', type: 'success', title: 'Exito', text: 'Asientos adquiridos existosamente'
+                    })
+                } else {
+                    this.$notify({
+                        group: 'foo', type: 'error', title: 'Error', text: 'No es posible completar la operacion'
+                    })
+                }
+                console.log(snapshot);
+            }).catch(() => this.$notify({
+                group: 'foo', type: 'error', title: 'Error', text: 'No es posible completar la operacion'
+            }))
+        },
         cargarElementos: function (data) {
             this.asientos = data
         },
         guardar: function () {
-            this.validarAsientos();
-            this.actualizarElementos();
+            const transactionResult = runTransaction(ref(getDatabase(), `${path}/${pathId}`),
+                valuesDB => this.validarCompra(valuesDB))
+            this.validarRespuesta(transactionResult);
             this.contador = 0
             console.log("transaccion ejecutada");
+        },
+        validarCompra: function (valoresDB) {
+            this.asientosSeleccionados().forEach(function (asiento) {
+                if (valoresDB.find(a => a.id == asiento.id).adquirido) {
+                    return
+                }
+                asiento.adquirido = true
+            })
+            return this.asientos
         },
         cancelar: function () {
             this.asientosSeleccionados().forEach(function (asiento) {

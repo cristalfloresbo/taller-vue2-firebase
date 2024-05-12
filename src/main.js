@@ -1,12 +1,7 @@
 import Vue from 'vue'
 import App from './App.vue'
 import BootstrapVue from 'bootstrap-vue'
-
-
-
-Vue.config.productionTip = false
-Vue.use(BootstrapVue)
-
+import Notifications from 'vue-notification'
 // Import Bootstrap and BootstrapVue CSS files (order is important)
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
@@ -15,6 +10,11 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getDatabase } from "firebase/database";
+
+Vue.config.productionTip = false
+Vue.use(BootstrapVue)
+Vue.use(Notifications)
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
