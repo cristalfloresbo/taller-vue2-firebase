@@ -13,6 +13,7 @@
         </div>
         <div class="botones">
             <b-button variant="success" @click="guardar">Guardar</b-button>
+            <b-button style="margin-left: 10px" @click="liberar">Liberar</b-button>
         </div>
     </b-container>
 </template>
@@ -74,6 +75,13 @@ export default {
         },
         asientosSeleccionados: function () {
             return this.asientos.filter(a => !a.disponible && !a.adquirido)
+        },
+        liberar: function() {
+            this.asientos.forEach(function(asiento) {
+                asiento.disponible = true
+                asiento.adquirido = false
+            })
+            this.actualizarElementos()
         }
     }
 }
