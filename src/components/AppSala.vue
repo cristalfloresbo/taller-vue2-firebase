@@ -18,24 +18,20 @@
     </b-container>
 </template>
 <script>
-import { child, get, getDatabase, ref, set } from "firebase/database";
+import { getDatabase, onValue, ref, set } from "firebase/database";
 
 const path = 'salas';
 const pathId = 1;
 
 export default {
     created() {
-        const dbRef = ref(getDatabase());
-        get(child(dbRef, `${path}/${pathId}`))
-            .then((snapshot) => {
+        onValue(ref(getDatabase(), `${path}/${pathId}`),(snapshot) => {
                 if (snapshot.exists()) {
                     console.log(snapshot.val());
                     this.cargarElementos(snapshot.val())
                 } else {
                     console.log("No data available");
                 }
-            }).catch((error) => {
-                console.error(error);
             })
     },
     data() {
@@ -51,6 +47,7 @@ export default {
                 return
             }
             asiento.disponible = !asiento.disponible
+            this.actualizarElementos()
             console.log(asiento);
         },
         actualizarElementos: function () {
