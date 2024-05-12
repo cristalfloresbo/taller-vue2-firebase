@@ -23,19 +23,19 @@ const path = 'salas';
 const pathId = 1;
 
 export default {
-    created () {
+    created() {
         const dbRef = ref(getDatabase());
         get(child(dbRef, `${path}/${pathId}`))
-        .then((snapshot) => {
-            if(snapshot.exists()) {
-                console.log(snapshot.val());
-                this.cargarElementos(snapshot.val())
-            } else {
-                console.log("No data available");
-            }
-        }).catch((error) => {
-            console.error(error);
-        })
+            .then((snapshot) => {
+                if (snapshot.exists()) {
+                    console.log(snapshot.val());
+                    this.cargarElementos(snapshot.val())
+                } else {
+                    console.log("No data available");
+                }
+            }).catch((error) => {
+                console.error(error);
+            })
     },
     data() {
         return {
@@ -56,15 +56,24 @@ export default {
             const db = getDatabase();
             set(ref(db, `${path}/${pathId}`), this.asientos)
         },
-        cargarElementos: function(data) {
+        cargarElementos: function (data) {
             this.asientos = data
         },
-        guardar: function() {
+        guardar: function () {
+            this.validarAsientos();
             this.actualizarElementos();
             console.log("transaccion ejecutada");
         },
+        validarAsientos: function () {
+            this.asientosSeleccionados().forEach(asiento => {
+                asiento.adquirido = true
+            });
+        },
         asientoDisponible: function (asiento) {
             return !asiento.adquirido
+        },
+        asientosSeleccionados: function () {
+            return this.asientos.filter(a => !a.disponible && !a.adquirido)
         }
     }
 }
