@@ -12,8 +12,13 @@
             </b-row>
         </div>
         <div class="botones">
-            <b-button variant="success" @click="guardar">Guardar</b-button>
+            <b-button :disabled="contador == 0" variant="success" @click="guardar">Guardar</b-button>
+            <b-button style="margin-left: 10px" :disabled="contador == 0" variant="danger"
+                @click="cancelar">Cancelar</b-button>
             <b-button style="margin-left: 10px" @click="liberar">Liberar</b-button>
+        </div>
+        <div style="margin-top: 20px;">
+            <strong>Asientos seleccionados {{ contador }}</strong>
         </div>
     </b-container>
 </template>
@@ -39,6 +44,7 @@ export default {
     data() {
         return {
             id: '',
+            contador: 0,
             asientos: []
         }
     },
@@ -52,6 +58,7 @@ export default {
             asiento.disponible = !asiento.disponible
             asiento.user_id = this.id
             this.actualizarElementos()
+            this.contador = this.asientosSeleccionados().length
             console.log(asiento);
         },
         actualizarElementos: function () {
@@ -64,7 +71,16 @@ export default {
         guardar: function () {
             this.validarAsientos();
             this.actualizarElementos();
+            this.contador = 0
             console.log("transaccion ejecutada");
+        },
+        cancelar: function () {
+            this.asientosSeleccionados().forEach(function (asiento) {
+                asiento.user_id = null
+                asiento.disponible = true
+            })
+            this.actualizarElementos()
+            this.contador = 0
         },
         validarAsientos: function () {
             this.asientosSeleccionados().forEach(asiento => {
@@ -77,13 +93,14 @@ export default {
         asientosSeleccionados: function () {
             return this.asientos.filter(a => !a.disponible && !a.adquirido)
         },
-        liberar: function() {
-            this.asientos.forEach(function(asiento) {
+        liberar: function () {
+            this.asientos.forEach(function (asiento) {
                 asiento.disponible = true
                 asiento.adquirido = false
                 asiento.user_id = null
             })
             this.actualizarElementos()
+            this.contador = 0
         }
     }
 }
